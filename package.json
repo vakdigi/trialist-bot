@@ -1,0 +1,15 @@
+{
+  "name": "trialist-bot",
+  "version": "1.0.0",
+  "description": "Discord bot: slash command to create an onboarding thread and ping a user.",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node deploy-commands.js && node index.js",
+    "deploy": "node deploy-commands.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5"
+  }
+}
