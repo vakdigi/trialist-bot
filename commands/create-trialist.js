@@ -17,8 +17,14 @@ module.exports = {
     )
     .addStringOption((option) =>
       option
+        .setName('roblox_username')
+        .setDescription("The trialist's Roblox username")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
         .setName('roblox_id')
-        .setDescription("The trialist's Roblox ID / username")
+        .setDescription("The trialist's Roblox ID")
         .setRequired(true)
     )
     .addStringOption((option) =>
@@ -27,12 +33,9 @@ module.exports = {
         .setDescription('Date of initiation (e.g. 2026-07-06)')
         .setRequired(true)
     )
-    // Sets a sane default so random members can't even see the command;
-    // real enforcement still happens below via ALLOWED_ROLE_IDS.
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
 
   async execute(interaction) {
-    // Role gate: only members with one of the configured roles can run this.
     const memberRoleIds = interaction.member.roles.cache.map((role) => role.id);
     const isAllowed =
       ALLOWED_ROLE_IDS.length === 0 ||
@@ -47,6 +50,7 @@ module.exports = {
     }
 
     const targetUser = interaction.options.getUser('user');
+    const robloxUsername = interaction.options.getString('roblox_username');
     const robloxId = interaction.options.getString('roblox_id');
     const dateOfInitiation = interaction.options.getString('date_of_initiation');
 
@@ -73,25 +77,20 @@ module.exports = {
       return;
     }
 
-    // Acknowledge immediately so Discord doesn't time out the interaction.
     await interaction.deferReply({ ephemeral: true });
 
     try {
-      // PrivateThread: only invited members + users with Manage Threads can see it,
-      // regardless of whether they can otherwise view the parent channel.
       const thread = await targetChannel.threads.create({
-        name: `Trialist - ${targetUser.username}`,
+        name: `Trialist - ${robloxUsername}`,
         type: ChannelType.PrivateThread,
-        invitable: false, // only mods (Manage Threads) can add/remove members, not the trialist
-        autoArchiveDuration: 10080, // 7 days
+        invitable: false,
+        autoArchiveDuration: 10080,
         reason: `Trialist onboarding created by ${interaction.user.tag}`,
       });
 
-      // Give the trialist access to this specific thread.
       await thread.members.add(targetUser.id);
 
-      // ---- Predetermined message template. Edit this to match your format. ----
-  const message = [
+      const message = [
         `👋 Welcome, ${targetUser}!`,
         '',
         `**Username:** ${robloxUsername}`,
@@ -106,7 +105,6 @@ module.exports = {
         '',
         'Any further questions you can direct them within this private thread.',
       ].join('\n');
-      // --------------------------------------------------------------------------
 
       await thread.send(message);
 
