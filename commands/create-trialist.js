@@ -92,14 +92,20 @@ module.exports = {
 
       // ---- Predetermined message template. Edit this to match your format. ----
       const message = [
-        `👋 Welcome, ${targetUser}!`,
-        '',
-        `**Username:** ${targetUser.username}`,
-        `**Roblox ID:** ${robloxId}`,
-        `**Date of Initiation:** ${dateOfInitiation}`,
-        '',
-        'A staff member will be with you shortly to walk you through the trialist process.',
-      ].join('\n');
+  `👋 Welcome, ${targetUser}!`,
+  '',
+  `**Username:** ${targetUser.username}`,
+  `**Roblox ID:** ${robloxId}`,
+  `**Date of Initiation:** ${dateOfInitiation}`,
+  '',
+  'Please make a copy of this spreadsheet [AOD | Event Tracker Template](https://docs.google.com/spreadsheets/d/1b0DOHP7IDxUCW8nEmheS98aCPxSqtFBmDyMNK_6ZtYA/edit?gid=938354717#gid=938354717) and ensure you share the document with the following emails:',
+  '',
+  '- vakdigi@gmail.com',
+  '- wettywetspell@gmail.com',
+  '- lleoo3261@gmail.com',
+  '',
+  'Any further questions you can direct them within this private thread.',
+].join('\n');
       // --------------------------------------------------------------------------
 
       await thread.send(message);
