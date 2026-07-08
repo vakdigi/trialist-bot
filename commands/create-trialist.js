@@ -33,9 +33,12 @@ module.exports = {
         .setDescription('Date of initiation (e.g. 2026-07-06)')
         .setRequired(true)
     )
+    // Sets a sane default so random members can't even see the command;
+    // real enforcement still happens below via ALLOWED_ROLE_IDS.
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
 
   async execute(interaction) {
+    // Role gate: only members with one of the configured roles can run this.
     const memberRoleIds = interaction.member.roles.cache.map((role) => role.id);
     const isAllowed =
       ALLOWED_ROLE_IDS.length === 0 ||
@@ -77,19 +80,39 @@ module.exports = {
       return;
     }
 
+    // Acknowledge immediately so Discord doesn't time out the interaction.
     await interaction.deferReply({ ephemeral: true });
 
     try {
+      // PrivateThread: only invited members + users with Manage Threads can see it,
+      // regardless of whether they can otherwise view the parent channel.
       const thread = await targetChannel.threads.create({
         name: `Trialist - ${robloxUsername}`,
         type: ChannelType.PrivateThread,
-        invitable: false,
-        autoArchiveDuration: 10080,
+        invitable: false, // only mods (Manage Threads) can add/remove members, not the trialist
+        autoArchiveDuration: 10080, // 7 days
         reason: `Trialist onboarding created by ${interaction.user.tag}`,
       });
 
+      // Give the trialist access to this specific thread.
       await thread.members.add(targetUser.id);
 
+      // Also add every staff member with an allowed role, so the thread sticks
+      // in their sidebar automatically instead of just being viewable-on-demand.
+      // Requires a full member fetch since role.members only reflects the cache.
+      await interaction.guild.members.fetch().catch(() => null);
+
+      for (const roleId of ALLOWED_ROLE_IDS) {
+        const role = await interaction.guild.roles.fetch(roleId).catch(() => null);
+        if (!role) continue;
+
+        for (const member of role.members.values()) {
+          if (member.id === targetUser.id) continue; // already added above
+          await thread.members.add(member.id).catch(() => null);
+        }
+      }
+
+      // ---- Predetermined message template. Edit this to match your format. ----
       const message = [
         `👋 Welcome, ${targetUser}!`,
         '',
@@ -105,6 +128,7 @@ module.exports = {
         '',
         'Any further questions you can direct them within this private thread.',
       ].join('\n');
+      // --------------------------------------------------------------------------
 
       await thread.send(message);
 
