@@ -3,13 +3,14 @@ const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const createTrialist = require('./commands/create-trialist');
 const threadAdd = require('./commands/thread-add');
 const threadRemove = require('./commands/thread-remove');
+const createVote = require('./commands/create-vote');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
 
 client.commands = new Collection();
-for (const cmd of [createTrialist, threadAdd, threadRemove]) {
+for (const cmd of [createTrialist, threadAdd, threadRemove, createVote]) {
   client.commands.set(cmd.data.name, cmd);
 }
 
