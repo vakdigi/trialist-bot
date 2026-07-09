@@ -3,8 +3,11 @@ const { REST, Routes } = require('discord.js');
 const createTrialist = require('./commands/create-trialist');
 const threadAdd = require('./commands/thread-add');
 const threadRemove = require('./commands/thread-remove');
+const createVote = require('./commands/create-vote');
 
-const commands = [createTrialist, threadAdd, threadRemove].map((cmd) => cmd.data.toJSON());
+const commands = [createTrialist, threadAdd, threadRemove, createVote].map((cmd) =>
+  cmd.data.toJSON()
+);
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
